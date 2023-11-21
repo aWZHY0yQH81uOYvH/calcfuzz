@@ -86,8 +86,10 @@ void press_button(button_path_t b) {
 		// mirror b.low to b.high
 		int sensorValue = analogRead(b.low);
 		if (sensorValue > voltageThreshold) {
-			pinMode(b.high, INPUT_PULLUP); // use pullup resistor instead of digitalWrite
+			// Don't connect when button of interest is not selected
+			pinMode(b.high, INPUT);
 		} else {
+			// Pull down when b.low is low to simulate connection of button contacts
 			digitalWrite(b.high, LOW);
 			pinMode(b.high, OUTPUT);
 		}
