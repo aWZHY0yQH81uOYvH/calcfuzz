@@ -17,29 +17,29 @@ struct button_path_t {
 	int delay;
 };
 
-const button_path_t b_percent	= {K5, K10, 500};
-const button_path_t b_sqr	= {K8, K9, 500};
-const button_path_t b_off	= {K3, K1, 50};
-const button_path_t b_on	= {K3, K2, 130};
-const button_path_t b_mrc	= {K7, K10, 500};
-const button_path_t b_msub	= {K5, K0, 500};
-const button_path_t b_madd	= {K4, K0, 500};
-const button_path_t b_div	= {K4, K1, 500};
-const button_path_t b_7		= {K6, K10, 100};
-const button_path_t b_8		= {K6, K0, 100};
-const button_path_t b_9		= {K6, K1, 100};
-const button_path_t b_mul	= {K4, K2, 500};
-const button_path_t b_4		= {K7, K0, 100};
-const button_path_t b_5		= {K7, K1, 100};
-const button_path_t b_6		= {K7, K2, 100};
-const button_path_t b_sub	= {K6, K2, 500};
-const button_path_t b_1		= {K8, K0, 100};
-const button_path_t b_2		= {K8, K1, 100};
-const button_path_t b_3		= {K8, K2, 100};
-const button_path_t b_add	= {K5, K2, 500};
-const button_path_t b_0		= {K8, K10, 100};
-const button_path_t b_dot	= {K7, K9, 100};
-const button_path_t b_eq	= {K4, K10, 500};
+const button_path_t b_percent = {K5, K10, 500};
+const button_path_t b_sqrt    = {K8, K9, 500};
+const button_path_t b_off     = {K3, K1, 50};
+const button_path_t b_on      = {K3, K2, 130};
+const button_path_t b_mrc     = {K7, K10, 500};
+const button_path_t b_msub    = {K5, K0, 500};
+const button_path_t b_madd    = {K4, K0, 500};
+const button_path_t b_div     = {K4, K1, 500};
+const button_path_t b_7       = {K6, K10, 100};
+const button_path_t b_8       = {K6, K0, 100};
+const button_path_t b_9       = {K6, K1, 100};
+const button_path_t b_mul     = {K4, K2, 500};
+const button_path_t b_4       = {K7, K0, 100};
+const button_path_t b_5       = {K7, K1, 100};
+const button_path_t b_6       = {K7, K2, 100};
+const button_path_t b_sub     = {K6, K2, 500};
+const button_path_t b_1       = {K8, K0, 100};
+const button_path_t b_2       = {K8, K1, 100};
+const button_path_t b_3       = {K8, K2, 100};
+const button_path_t b_add     = {K5, K2, 500};
+const button_path_t b_0       = {K8, K10, 100};
+const button_path_t b_dot     = {K7, K9, 100};
+const button_path_t b_eq      = {K4, K10, 500};
 
 // Helper function to map button names to button paths
 button_path_t parse_button(String buttonName) {
