@@ -101,6 +101,9 @@ void setup() {
 	for (int i = 0; i < 8; i++)
 		pinMode(i, INPUT);
 	press_button(B_ON);
+
+	// Say R when ready
+	Serial.print("R");
 }
 
 void loop() {
@@ -118,6 +121,6 @@ void loop() {
 		// Remove other characters
 		while (Serial.available()
 		       && (Serial.peek() < '0' || Serial.peek() > '9'))
-			Serial.print(Serial.read());
+			Serial.read();
 	}
 }

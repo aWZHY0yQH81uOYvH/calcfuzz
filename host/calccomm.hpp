@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <cstring>
+#include <cassert>
 #include <string>
 #include <stdexcept>
 
@@ -16,7 +17,7 @@ class Calculator {
 public:
 	// Connect to serial port on object construction
 	Calculator(const char *serial_port) {
-		portfd = open(serial_port, O_RDWR | O_NOCTTY | O_NDELAY);
+		portfd = open(serial_port, O_RDWR | O_NOCTTY);
 		if(portfd < 0)
 			throw std::runtime_error(std::string("Port open error: ") + strerror(errno));
 
@@ -39,6 +40,12 @@ public:
 
 		if(tcsetattr(portfd, TCSANOW, &config) < 0)
 			throw std::runtime_error(std::string("Set config error: ") + strerror(errno));
+
+		// Wait for ready
+		char rx;
+		size_t rx_count = read(portfd, &rx, 1);
+		if(rx_count != 1 || rx != 'R')
+			throw std::runtime_error("Arduino not ready");
 	}
 
 	// Disconnect on destruction
@@ -87,11 +94,15 @@ public:
 		size_t rx_count = read(portfd, &rx, 1);
 		if(rx_count != 1) return false;
 		if(rx != 'K') return false;
+
+		return true;
 	}
 
 	void test() {
-		press_button(B_ON);
-		press_button(B_1);
+		assert(press_button(B_ON));
+		assert(press_button(B_1));
+		assert(press_button(B_2));
+		assert(press_button(B_3));
 	}
 
 private:
