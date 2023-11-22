@@ -11,6 +11,7 @@
 #include <thread>
 #include <atomic>
 #include <set>
+#include <memory>
 
 #include <opencv2/opencv.hpp>
 
@@ -32,6 +33,16 @@ int main(int argc, char **argv) {
 	const char *serial_port = argv[1];
 	const char *video_path = argv[2];
 	const int webcam_ind = atoi(argv[3]);
+
+#ifndef CALIBRATE_MODE
+	unique_ptr<Calculator> calc;
+	try {
+		calc.reset(new Calculator(serial_port));
+	} catch(std::runtime_error &e) {
+		cerr << e.what() << endl;
+		return 1;
+	}
+#endif
 
 	Mat frame;
 
@@ -103,12 +114,11 @@ int main(int argc, char **argv) {
 
 #else
 
-	Calculator calc(serial_port);
 	Generator gen;
 
 	while(!gen.done()) {
 		const auto button_info = gen.generate();
-		if(!calc.press_button(button_info.first, true))
+		if(!calc->press_button(button_info.first, true))
 			break;
 
 		// Take a frame if requested
