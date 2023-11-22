@@ -67,6 +67,7 @@ public:
 
 		std::string command = std::to_string(button) + "\n";
 		write(portfd, command.c_str(), command.length());
+		tcdrain(portfd);
 
 		char rx;
 		size_t rx_count = read(portfd, &rx, 1);
