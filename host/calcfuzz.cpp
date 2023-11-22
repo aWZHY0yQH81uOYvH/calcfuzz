@@ -3,8 +3,8 @@
  and save images of the calculator for later processing
 */
 
-#include "calccomm.hpp"
-#include "generator.hpp"
+#include "Calculator.hpp"
+#include "Generator.hpp"
 
 #include <iostream>
 #include <chrono>

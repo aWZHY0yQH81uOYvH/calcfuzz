@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "buttons.hpp"
+#include "Buttons.hpp"
 
 #include <utility>
 #include <iostream>

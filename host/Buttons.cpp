@@ -1,4 +1,4 @@
-#include "buttons.hpp"
+#include "Buttons.hpp"
 
 const char * const button_names[B_MAX] = {
 	"0",

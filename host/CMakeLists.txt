@@ -16,11 +16,11 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 add_executable(calcfuzz
 	calcfuzz.cpp
-	buttons.cpp
+	Buttons.cpp
 
-	calccomm.hpp
-	buttons.hpp
-	generator.hpp
+	Calculator.hpp
+	Buttons.hpp
+	Generator.hpp
 )
 
 target_link_libraries(calcfuzz ${OpenCV_LIBS})
@@ -29,7 +29,7 @@ target_link_libraries(calcfuzz ${OpenCV_LIBS})
 add_executable(digitprocess
 	digitprocess.cpp
 
-	digit.hpp
+	Digit.hpp
 )
 
 target_link_libraries(digitprocess ${OpenCV_LIBS})

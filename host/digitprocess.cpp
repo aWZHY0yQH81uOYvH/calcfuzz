@@ -2,7 +2,7 @@
  Post-process captured images
 */
 
-#include "digit.hpp"
+#include "Digit.hpp"
 
 #include <iostream>
 #include <vector>
