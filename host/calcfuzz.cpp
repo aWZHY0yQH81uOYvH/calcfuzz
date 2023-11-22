@@ -12,6 +12,7 @@
 #include <atomic>
 #include <set>
 #include <memory>
+#include <cstring>
 
 #include <opencv2/opencv.hpp>
 
@@ -25,14 +26,66 @@ const chrono::milliseconds inter_op_delay(100);
 
 int main(int argc, char **argv) {
 
-	if(argc < 4)
-		// TODO: add usage printout
-		return 1;
+	const char *serial_port = nullptr;
+	const char *video_path = nullptr;
+	int webcam_ind = 0;
+	bool help = false;
 
-	// Parse arguments
-	const char *serial_port = argv[1];
-	const char *video_path = argv[2];
-	const int webcam_ind = atoi(argv[3]);
+	for(int argn = 1; argn < argc; argn++) {
+		const char *arg = argv[argn];
+
+		if(strcmp(arg, "-h") == 0) {
+			// Suppress warning printout
+			serial_port++;
+			video_path++;
+			help = true;
+		}
+
+		else if(strstr(arg, "-w") == arg) {
+			if(strlen(arg) > 2)
+				webcam_ind = atoi(arg + 2);
+			else if(++argn < argc)
+				webcam_ind = atoi(argv[argn]);
+			else {
+				cerr << "Missing webcam index" << endl << endl;
+				help = true;
+			}
+		}
+
+		else if(!video_path)
+			video_path = arg;
+
+		else if(!serial_port)
+			serial_port = arg;
+
+		else {
+			cerr << "Unknown argument \"" << arg << "\"" << endl;
+			help = true;
+		}
+	}
+
+	// Require inputs
+	if(!video_path) {
+		cerr << "Video path required" << endl << endl;
+		help = true;
+	}
+
+#ifndef CALIBRATE_MODE
+	if(!serial_port) {
+		cerr << "Serial port required" << endl << endl;
+		help = true;
+	}
+#endif
+
+	// Print help
+	if(help) {
+		cerr << "===== calcfuzz =====" << endl
+		<< "Usage: " << argv[0] << " [-h] [-w webcam index] [MP4 video path] [serial port]" << endl
+		<< "\t-h          : print help" << endl
+		<< "\t-w [number] : select webcam" << endl
+		<< endl;
+		return 1;
+	}
 
 #ifndef CALIBRATE_MODE
 	unique_ptr<Calculator> calc;

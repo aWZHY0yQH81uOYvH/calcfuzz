@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cstring>
 
 #include <opencv2/opencv.hpp>
 
@@ -39,19 +40,50 @@ void mouse_callback(int event, int x, int y, int flags, void *userdata) {
 }
 
 int main(int argc, const char **argv) {
-	if(argc < 2)
-		// TODO: add usage printout
+	const char *video_path = nullptr;
+	bool help = false;
+
+	for(int argn = 1; argn < argc; argn++) {
+		const char *arg = argv[argn];
+
+		if(strcmp(arg, "-h") == 0) {
+			// Suppress warning printout
+			video_path++;
+			help = true;
+		}
+
+		else if(!video_path)
+			video_path = arg;
+
+		else {
+			cerr << "Unknown argument \"" << arg << "\"" << endl;
+			help = true;
+		}
+	}
+
+	// Require inputs
+	if(!video_path) {
+		cerr << "Video path required" << endl << endl;
+		help = true;
+	}
+
+	// Print help
+	if(help) {
+		cerr << "===== digitprocess =====" << endl
+		<< "Usage: " << argv[0] << " [-h] [MP4 video path]" << endl
+		<< "\t-h          : print help" << endl
+		<< endl;
 		return 1;
+	}
 
-	// Parse arguments
-	const char *video_path = argv[1];
-
+	// Open video file
 	VideoCapture vid(video_path);
 	if(!vid.isOpened()) {
 		cerr << "Could not open video file " << video_path << endl;
 		return 1;
 	}
 
+	// Ask user to select segment points
 	vid.read(frame);
 
 	namedWindow("Select Points", WINDOW_NORMAL);
