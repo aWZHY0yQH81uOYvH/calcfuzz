@@ -76,10 +76,10 @@ public:
 	}
 
 	void test() {
-		assert(press_button(B_ON));
-		assert(press_button(B_1));
-		assert(press_button(B_2));
-		assert(press_button(B_3));
+		assert(press_button(B_ON, true));
+		assert(press_button(B_1, true));
+		assert(press_button(B_2, true));
+		assert(press_button(B_3, true));
 	}
 
 private:

@@ -170,8 +170,8 @@ int main(int argc, char **argv) {
 	Generator gen;
 
 	while(!gen.done()) {
-		const auto button_info = gen.generate();
-		if(!calc->press_button(button_info.first, true))
+		const auto button_info = gen.generate_print();
+		if(!calc->press_button(button_info.first))
 			break;
 
 		// Take a frame if requested
