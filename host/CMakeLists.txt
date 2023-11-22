@@ -17,3 +17,12 @@ add_executable(calcfuzz
 )
 
 target_link_libraries(calcfuzz ${OpenCV_LIBS})
+
+
+add_executable(digitprocess
+	digitprocess.cpp
+
+	digit.hpp
+)
+
+target_link_libraries(digitprocess ${OpenCV_LIBS})
