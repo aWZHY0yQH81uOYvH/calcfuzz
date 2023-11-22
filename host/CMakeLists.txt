@@ -9,9 +9,11 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 add_executable(calcfuzz
 	calcfuzz.cpp
+	buttons.cpp
 
 	calccomm.hpp
 	buttons.hpp
+	generator.hpp
 )
 
 target_link_libraries(calcfuzz ${OpenCV_LIBS})

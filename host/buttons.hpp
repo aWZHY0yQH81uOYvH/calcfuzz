@@ -27,3 +27,5 @@ enum BUTTON_ID {
 	B_ON,
 	B_MAX
 };
+
+extern const char * const button_names[];

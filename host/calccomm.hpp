@@ -14,6 +14,7 @@
 #include <cassert>
 #include <string>
 #include <stdexcept>
+#include <iostream>
 
 class Calculator {
 public:
@@ -58,8 +59,11 @@ public:
 
 	// Press a button and wait for release
 	// Return false on failure
-	bool press_button(BUTTON_ID button) {
+	bool press_button(BUTTON_ID button, bool print = false, std::ostream &out = std::cout) {
 		if(portfd < 0) return false;
+
+		if(print)
+			out << "Pressed " << button_names[button] << std::endl;
 
 		std::string command = std::to_string(button) + "\n";
 		write(portfd, command.c_str(), command.length());

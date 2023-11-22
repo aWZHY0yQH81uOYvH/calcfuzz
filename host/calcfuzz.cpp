@@ -1,4 +1,10 @@
+/*
+ Generate random button presses using the Generator class
+ and save images of the calculator for later processing
+*/
+
 #include "calccomm.hpp"
+#include "generator.hpp"
 
 #include <iostream>
 #include <chrono>
@@ -7,13 +13,33 @@
 #include <atomic>
 #include <opencv2/opencv.hpp>
 
+//#define CALIBRATE_MODE
+
 using namespace std;
 using namespace cv;
 
-int main() {
+const chrono::milliseconds cam_delay(100);
+
+int main(int argc, char **argv) {
+
+	if(argc < 4)
+		// TODO: add usage printout
+		return 1;
+
+	// Parse arguments
+	const char *serial_port = argv[1];
+	const char *video_path = argv[2];
+	const int webcam_ind = atoi(argv[3]);
+
 	Mat frame;
 
-	VideoCapture webcam(0, CAP_V4L2);
+#ifdef __linux__
+	const int api_pref = CAP_V4L2;
+#else
+	const int api_pref = CAP_ANY;
+#endif
+
+	VideoCapture webcam(webcam_ind, api_pref);
 	if(!webcam.isOpened()) {
 		cerr << "Could not open webcam" << endl;
 		return 1;
@@ -22,7 +48,7 @@ int main() {
 	// Get frame to figure out video size
 	webcam >> frame;
 
-	VideoWriter videowriter("calc.mp4", VideoWriter::fourcc('m', 'p', '4', 'v'), 30, frame.size());
+	VideoWriter videowriter(video_path, VideoWriter::fourcc('m', 'p', '4', 'v'), 1, frame.size());
 	if(!videowriter.isOpened()) {
 		cerr << "Could not open video file" << endl;
 		return 1;
@@ -45,6 +71,8 @@ int main() {
 		}
 	});
 
+#ifdef CALIBRATE_MODE
+
 	for(int x = 0; x < 10; x++) {
 		// Thread for printing out time to measure delay
 		thread printer([&]() {
@@ -66,6 +94,36 @@ int main() {
 
 		printer.join();
 	}
+
+#else
+
+	Calculator calc(serial_port);
+	Generator gen;
+
+	while(!gen.done()) {
+		const auto button_info = gen.generate();
+		if(!calc.press_button(button_info.first, true))
+			break;
+
+		// Take a frame if requested
+		if(button_info.second) {
+			// Wait for camera delay
+			// TODO: pipeline
+			this_thread::sleep_for(cam_delay);
+
+			// Wait for new frame
+			unique_lock<mutex> lock(frame_mutex);
+			frame_cond.wait(lock, [&]() {return new_frame;});
+			new_frame = false;
+
+			// Save frame
+			videowriter << frame;
+
+			frame_mutex.unlock();
+		}
+	}
+
+#endif
 
 	run = false;
 	reader_thread.join();
