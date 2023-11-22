@@ -23,7 +23,7 @@ public:
 		0b0000111,
 		0b1111111,
 		0b1101111,
-		0b1000000
+		0b1000000 // Minus sign
 	};
 
 	Digit(std::vector<cv::Point2i> &segpts, bool handle_error = false, int avg_size = 5, double thresh = 0.75):
@@ -36,7 +36,7 @@ public:
 		if((int)segpts.size() < npts)
 			throw std::invalid_argument("Not enough points");
 
-		// Grab the last eight points
+		// Grab our points off the end of segpts
 		for(int x = npts - 1; x >= 0; x--) {
 			pts[x] = *segpts.rbegin();
 			segpts.pop_back();
@@ -44,13 +44,16 @@ public:
 	}
 
 	// Return average brightness around area
-	int avg_box(const cv::Mat &image, cv::Point2i center) {
+	int avg_box(const cv::Mat &image, cv::Point2i center) const {
 		// Extract region of interest
-		const cv::Mat roi{image,
+		const cv::Point2i offset{avg_size, avg_size};
+		const cv::Mat roi{
+			image,
 			cv::Rect{
-				center - cv::Point2i{avg_size, avg_size},
-				center + cv::Point2i{avg_size, avg_size}
-			}};
+				center - offset,
+				center + offset
+			}
+		};
 
 		// Average RGB over area
 		cv::Scalar avg = cv::mean(roi);
@@ -59,7 +62,7 @@ public:
 
 	// Get background brightness of this segment
 	// Determine by checking in middle of segment squares
-	int bg_color(const cv::Mat &image) {
+	int bg_color(const cv::Mat &image) const {
 		const cv::Point2i top_center = (pts[0] + pts[1] + pts[5] + pts[6]) / 4;
 		const cv::Point2i bot_center = (pts[2] + pts[3] + pts[4] + pts[6]) / 4;
 
@@ -68,7 +71,7 @@ public:
 	}
 
 	// Get digit value
-	std::string value(const cv::Mat &image) {
+	std::string value(const cv::Mat &image) const {
 		const int background = bg_color(image);
 		const int threshold = background * thresh;
 
@@ -104,7 +107,7 @@ private:
 	cv::Point2i pts[9];
 
 	// If we are going to handle the error segment
-	bool handle_error;
+	const bool handle_error;
 
 	// How many pixels to average over
 	const int avg_size;
