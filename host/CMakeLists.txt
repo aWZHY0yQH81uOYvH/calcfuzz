@@ -21,6 +21,7 @@ add_executable(calcfuzz
 	Calculator.hpp
 	Buttons.hpp
 	Generator.hpp
+	GeneratorStream.hpp
 )
 
 target_link_libraries(calcfuzz ${OpenCV_LIBS})

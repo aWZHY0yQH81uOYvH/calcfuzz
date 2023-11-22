@@ -5,8 +5,10 @@
 
 #include "Calculator.hpp"
 #include "Generator.hpp"
+#include "GeneratorStream.hpp"
 
 #include <iostream>
+#include <fstream>
 #include <chrono>
 #include <thread>
 #include <atomic>
@@ -31,6 +33,9 @@ int main(int argc, char **argv) {
 	int webcam_ind = 0;
 	bool help = false;
 
+	std::unique_ptr<Generator> gen(new Generator());
+	std::unique_ptr<istream> input_file;
+
 	for(int argn = 1; argn < argc; argn++) {
 		const char *arg = argv[argn];
 
@@ -48,6 +53,49 @@ int main(int argc, char **argv) {
 				webcam_ind = atoi(argv[argn]);
 			else {
 				cerr << "Missing webcam index" << endl << endl;
+				help = true;
+			}
+		}
+
+		else if(strcmp(arg, "-g") == 0) {
+			if(++argn < argc) {
+				arg = argv[argn];
+
+				if(strcmp(arg, "default") == 0)
+					gen.reset(new Generator());
+
+				else if(strcmp(arg, "file") == 0) {
+					if(++argn < argc) {
+						arg = argv[argn];
+
+						if(strcmp(arg, "-") == 0)
+							gen.reset(new GeneratorStream(cin));
+
+						else {
+							input_file.reset(new ifstream(arg));
+							if(!input_file->good()) {
+								cerr << "Could not open file " << arg << endl;
+								return 1;
+							}
+
+							gen.reset(new GeneratorStream(*input_file));
+						}
+					}
+
+					else {
+						cerr << "Missing generator file" << endl << endl;
+						help = true;
+					}
+				}
+
+				else {
+					cerr << "Unknown generator type" << endl << endl;
+					help = true;
+				}
+			}
+
+			else {
+				cerr << "Missing generator type" << endl << endl;
 				help = true;
 			}
 		}
@@ -80,9 +128,12 @@ int main(int argc, char **argv) {
 	// Print help
 	if(help) {
 		cerr << "===== calcfuzz =====" << endl
-		<< "Usage: " << argv[0] << " [-h] [-w webcam index] [MP4 video path] [serial port]" << endl
-		<< "\t-h          : print help" << endl
-		<< "\t-w [number] : select webcam" << endl
+		<< "Usage: " << argv[0] << " [-h] [-w webcam index] [-g generator] [MP4 video path] [serial port]" << endl
+		<< "\t-h             : print help" << endl
+		<< "\t-w [number]    : select webcam" << endl
+		<< "\t-g [generator] : specify a generator type" << endl
+		<< "\t                     default : press buttions 0-9" << endl
+		<< "\t                     file    : read button presses from a file; following argument must be a file; specify \"-\" to use stdin" << endl
 		<< endl;
 		return 1;
 	}
@@ -167,10 +218,8 @@ int main(int argc, char **argv) {
 
 #else
 
-	Generator gen;
-
-	while(!gen.done()) {
-		const auto button_info = gen.generate_print();
+	while(!gen->done()) {
+		const auto button_info = gen->generate_print();
 		if(!calc->press_button(button_info.first))
 			break;
 
