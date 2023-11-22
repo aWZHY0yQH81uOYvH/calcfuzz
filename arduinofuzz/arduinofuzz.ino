@@ -1,6 +1,6 @@
 
-const int K0 = 2;
-const int K1 = 3;
+const int K0 = 6;
+const int K1 = 5;
 const int K2 = 4;
 const int K3 = A0;
 const int K4 = A1;
@@ -8,8 +8,8 @@ const int K5 = A2;
 const int K6 = A3;
 const int K7 = A4;
 const int K8 = A5;
-const int K9 = 5;
-const int K10 = 6;
+const int K9 = 3;
+const int K10 = 2;
 
 struct button_path_t {
 	int low;
