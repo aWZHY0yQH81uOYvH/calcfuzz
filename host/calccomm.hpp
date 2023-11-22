@@ -31,10 +31,8 @@ public:
 		}
 
 		struct termios config;
-		config.c_iflag = 0;
-		config.c_oflag = 0;
+		memset(&config, 0, sizeof(termios));
 		config.c_cflag = CREAD; // Enable receiver
-		config.c_lflag = 0;
 
 		cfmakeraw(&config);
 
