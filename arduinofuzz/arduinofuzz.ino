@@ -98,8 +98,6 @@ void press_button(BUTTON_ID button) {
 
 void setup() {
 	Serial.begin(9600);  // Set the baud rate to match your serial monitor
-	for (int i = 0; i < 8; i++)
-		pinMode(i, INPUT);
 	press_button(B_ON);
 
 	// Say R when ready
