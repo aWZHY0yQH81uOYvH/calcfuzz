@@ -9,8 +9,9 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
-#include <condition_variable>
 #include <atomic>
+#include <set>
+
 #include <opencv2/opencv.hpp>
 
 //#define CALIBRATE_MODE
@@ -19,6 +20,7 @@ using namespace std;
 using namespace cv;
 
 const chrono::milliseconds cam_delay(100);
+const chrono::milliseconds inter_op_delay(100);
 
 int main(int argc, char **argv) {
 
@@ -55,19 +57,28 @@ int main(int argc, char **argv) {
 	}
 
 	// Start another thread to continuously read from the webcam
-	// Might not need this with the CAP_V4L2 mode above, but the idea was to keep the camera frame buffer empty for minimal delay
+	// and save a frame at the requested time
 	atomic<bool> run(true);
-	bool new_frame = false;
 	mutex frame_mutex;
-	condition_variable frame_cond;
+	set<chrono::steady_clock::time_point> frame_times;
+
 	thread reader_thread([&]() {
 		while(run) {
-			frame_mutex.lock();
+			// Get a frame
 			webcam >> frame;
-			new_frame = true;
+
+			// Check if it's time to save a frame
+			frame_mutex.lock();
+			auto now = chrono::steady_clock::now();
+			auto it = frame_times.begin();
+			while(it != frame_times.end() && *it <= now) {
+				videowriter << frame;
+				it = frame_times.erase(it);
+			}
+
 			frame_mutex.unlock();
-			frame_cond.notify_one();
-			this_thread::sleep_for(chrono::milliseconds(1)); // time for the other thread to lock the mutex I guess
+
+			this_thread::sleep_for(chrono::milliseconds(1));
 		}
 	});
 
@@ -77,19 +88,14 @@ int main(int argc, char **argv) {
 		// Thread for printing out time to measure delay
 		thread printer([&]() {
 			for(int y = 0; y < 100; y++) {
-				cout << "Frame index " << (x+1) << " time " << y*10 << endl;
+				cout << "Frame index " << (x+1) << " time " << (y*10) << endl;
 				this_thread::sleep_for(chrono::milliseconds(10));
 			}
 		});
 
-		// Wait for new frame
-		unique_lock<mutex> lock(frame_mutex);
-		frame_cond.wait(lock, [&]() {return new_frame;});
-		new_frame = false;
-
-		// Save frame
-		videowriter << frame;
-
+		// Schedule a new frame to be taken now
+		frame_mutex.lock();
+		frame_times.emplace(chrono::steady_clock::now());
 		frame_mutex.unlock();
 
 		printer.join();
@@ -107,19 +113,13 @@ int main(int argc, char **argv) {
 
 		// Take a frame if requested
 		if(button_info.second) {
-			// Wait for camera delay
-			// TODO: pipeline
-			this_thread::sleep_for(cam_delay);
-
-			// Wait for new frame
-			unique_lock<mutex> lock(frame_mutex);
-			frame_cond.wait(lock, [&]() {return new_frame;});
-			new_frame = false;
-
-			// Save frame
-			videowriter << frame;
-
+			// Schedule a new frame to be taken cam_delay in the future
+			frame_mutex.lock();
+			frame_times.emplace(chrono::steady_clock::now() + cam_delay);
 			frame_mutex.unlock();
+
+			// Wait for the inter-operation delay (to account for inaccuracies in cam_delay)
+			this_thread::sleep_for(inter_op_delay);
 		}
 	}
 
