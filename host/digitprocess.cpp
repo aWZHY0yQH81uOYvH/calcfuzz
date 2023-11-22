@@ -61,37 +61,39 @@ int main(int argc, const char **argv) {
 	     << "Select error segment last." << endl;
 
 	// UI key processing loop
-	bool run = true;
-	while(run) {
-		show_select();
+	while(true) {
+		bool run = true;
+		while(run) {
+			show_select();
 
-		char key = waitKey() & 0xFF;
+			char key = waitKey() & 0xFF;
 
-		switch(key) {
-			case 'd': // d to delete point
-				if(segpts.size() > 0)
-					segpts.pop_back();
-				break;
+			switch(key) {
+				case 'd': // d to delete point
+					if(segpts.size() > 0)
+						segpts.pop_back();
+					break;
 
-			case 'e': // e to stop
-				run = false;
-				break;
+				case 'e': // e to stop
+					run = false;
+					break;
 
-			default:
-				break;
+				default:
+					break;
+			}
 		}
-	}
 
-	if(segpts.size() < 9 || segpts.size() % 8 != 1) {
-		cerr << "Invalid number of points" << endl;
-		return 1;
+		if(segpts.size() >= 9 && segpts.size() % 8 == 1)
+			break;
+		else
+			cerr << "Invalid number of points" << endl;
 	}
 
 	// Create digit processor objects
-	// Last one will handle error segment
+	// First one will handle error segment
 	vector<Digit> digits;
 	while(segpts.size())
-		digits.emplace_back(segpts, segpts.size() == 9);
+		digits.emplace_back(segpts, digits.size() == 0);
 
 	// Frame processing loop
 	while(!frame.empty()) {
