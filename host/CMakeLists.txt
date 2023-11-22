@@ -11,6 +11,7 @@ add_executable(calcfuzz
 	calcfuzz.cpp
 
 	calccomm.hpp
+	buttons.hpp
 )
 
 target_link_libraries(calcfuzz ${OpenCV_LIBS})
