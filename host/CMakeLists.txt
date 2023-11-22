@@ -3,7 +3,14 @@ project(calcrev)
 
 add_compile_options(-Wall -Wextra)
 
-find_package(OpenCV REQUIRED)
+find_package(OpenCV REQUIRED COMPONENTS
+	core
+	video
+	videoio
+	highgui
+	imgproc
+)
+
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 
