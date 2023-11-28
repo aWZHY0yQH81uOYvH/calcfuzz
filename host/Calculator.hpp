@@ -7,6 +7,7 @@
 #include "Buttons.hpp"
 
 #include <termios.h>
+#include <sys/select.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -43,9 +44,7 @@ public:
 			throw std::runtime_error(std::string("Set config error: ") + strerror(errno));
 
 		// Wait for ready
-		char rx;
-		size_t rx_count = read(portfd, &rx, 1);
-		if(rx_count != 1 || rx != 'R')
+		if(read_char() != 'R')
 			throw std::runtime_error("Arduino not ready");
 	}
 
@@ -53,6 +52,25 @@ public:
 	~Calculator() {
 		if(portfd >= 0)
 			close(portfd);
+	}
+
+	// Wait for a character on the serial port
+	char read_char() {
+		fd_set fdset;
+		FD_ZERO(&fdset);
+		FD_SET(portfd, &fdset);
+
+		// Wait (since read command doesn't seem to block under MINGW64)
+		int ret = select(portfd + 1, &fdset, nullptr, nullptr, nullptr);
+		if(ret < 0) return '?';
+
+		// Receive
+		char rx;
+		if(read(portfd, &rx, 1) != 1)
+			return '?';
+
+		return rx;
+
 	}
 
 	// Press a button and wait for release
@@ -67,10 +85,7 @@ public:
 		write(portfd, command.c_str(), command.length());
 		tcdrain(portfd);
 
-		char rx;
-		size_t rx_count = read(portfd, &rx, 1);
-		if(rx_count != 1) return false;
-		if(rx != 'K') return false;
+		if(read_char() != 'K') return false;
 
 		return true;
 	}
