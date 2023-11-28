@@ -105,20 +105,26 @@ void setup() {
 }
 
 void loop() {
-	if (Serial.available()) {
-		const int selection = Serial.parseInt();
+	// wait until data recieved
+	if (!Serial.available())
+		return;
 
-		if (selection < 0 || selection >= B_MAX) {
-			Serial.print("N");
-			return;
-		}
-
-		press_button(selection);
-		Serial.print("K");
-
-		// Remove other characters
-		while (Serial.available()
-		       && (Serial.peek() < '0' || Serial.peek() > '9'))
-			Serial.read();
+	// remove non-integers
+	if (Serial.peek() < '0' || Serial.peek() > '9') {
+		Serial.read();
+		return;
 	}
+
+	// parse button press
+	const BUTTON_ID selection = Serial.parseInt();
+
+	// ensure button is valid
+	if (selection < 0 || selection >= B_MAX) {
+		Serial.print("N");
+		return;
+	}
+
+	// press button
+	press_button(selection);
+	Serial.print("K");
 }
